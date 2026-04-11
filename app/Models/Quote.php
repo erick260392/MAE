@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Quote extends Model
 {
-    protected $fillable = ['customer_id', 'folio', 'status', 'total', 'notes'];
+    protected $fillable = ['customer_id', 'folio', 'status', 'total', 'notes', 'delivery_time', 'conditions'];
 
     protected static function booted(): void
     {

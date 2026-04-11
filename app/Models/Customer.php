@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends Model
 {
-    protected $fillable = ['name', 'company', 'phone', 'email', 'address', 'city', 'notes'];
+    protected $fillable = ['name', 'company', 'rfc', 'phone', 'email', 'address', 'city', 'zip_code', 'notes'];
 
     public function quotes(): HasMany
     {
