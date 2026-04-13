@@ -19,6 +19,7 @@ class Products extends Component
 
     public string $name = '';
     public string $description = '';
+    public string $application = '';
     public string $price = '';
     public string $stock = '';
     public string $unit = 'pieza';
@@ -29,7 +30,7 @@ class Products extends Component
 
     public function openCreate(): void
     {
-        $this->reset(['editingId', 'name', 'description', 'price', 'stock', 'category_id', 'image', 'currentImage']);
+        $this->reset(['editingId', 'name', 'description', 'application', 'price', 'stock', 'category_id', 'image', 'currentImage']);
         $this->unit = 'pieza';
         $this->active = true;
         $this->showModal = true;
@@ -40,6 +41,7 @@ class Products extends Component
         $this->editingId = $product->id;
         $this->name = $product->name;
         $this->description = $product->description ?? '';
+        $this->application = $product->application ?? '';
         $this->price = $product->price;
         $this->stock = $product->stock;
         $this->unit = $product->unit;
@@ -59,6 +61,7 @@ class Products extends Component
             'unit'        => 'required',
             'category_id' => 'required|exists:categories,id',
             'description' => 'nullable|max:500',
+            'application' => 'nullable|max:500',
             'image'       => 'nullable|image|max:2048',
         ]);
 
@@ -66,6 +69,7 @@ class Products extends Component
             'name'        => $this->name,
             'slug'        => Str::slug($this->name),
             'description' => $this->description,
+            'application' => $this->application,
             'price'       => $this->price,
             'stock'       => $this->stock,
             'unit'        => $this->unit,
@@ -84,7 +88,7 @@ class Products extends Component
         }
 
         $this->showModal = false;
-        $this->reset(['name', 'description', 'price', 'stock', 'category_id', 'image', 'currentImage', 'editingId']);
+        $this->reset(['name', 'description', 'application', 'price', 'stock', 'category_id', 'image', 'currentImage', 'editingId']);
     }
 
     public function toggleActive(Product $product): void

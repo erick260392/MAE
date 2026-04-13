@@ -10,11 +10,22 @@ class ProductCatalog extends Component
 {
     public string $search = '';
     public ?int $activeCategory = null;
+    public ?int $selectedProductId = null;
 
     public function setCategory(?int $id): void
     {
         $this->activeCategory = $id;
         $this->search = '';
+    }
+
+    public function openDetail(int $productId): void
+    {
+        $this->selectedProductId = $productId;
+    }
+
+    public function closeDetail(): void
+    {
+        $this->selectedProductId = null;
     }
 
     public function addToCart(int $productId): void
@@ -34,7 +45,11 @@ class ProductCatalog extends Component
             ->orderBy('name')
             ->get();
 
-        return view('livewire.catalog.product-catalog', compact('categories', 'products'))
+        $selectedProduct = $this->selectedProductId
+            ? Product::with('category')->find($this->selectedProductId)
+            : null;
+
+        return view('livewire.catalog.product-catalog', compact('categories', 'products', 'selectedProduct'))
             ->layout('layouts.public');
     }
 }

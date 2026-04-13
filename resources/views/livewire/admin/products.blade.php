@@ -110,6 +110,13 @@
                         @error('description') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
+                    <div class="col-span-2">
+                        <label class="block text-sm text-gray-600 mb-1">Aplicación</label>
+                        <textarea wire:model="application" rows="2" placeholder="Ej: Sistemas hidráulicos de alta presión, maquinaria industrial..."
+                            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400"></textarea>
+                        @error('application') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Categoría <span class="text-red-500">*</span></label>
                         <select wire:model="category_id"

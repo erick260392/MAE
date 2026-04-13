@@ -24,9 +24,11 @@ Sitio completo con catálogo público, cotizaciones, inventario, clientes y pane
 - `/admin/categories` — CRUD categorías
 - `/admin/products` — CRUD productos
 - `/admin/customers` — CRUD clientes
+- `/admin/inventory` — Movimientos de stock
 - `/admin/quotes` — Listado cotizaciones
 - `/admin/quotes/create` — Nueva cotización
 - `/admin/quotes/{quote}` — Detalle cotización
+- `/admin/quotes/{quote}/pdf` — PDF de cotización (QuotePdfController)
 
 ## Usuario admin
 - Email: admin@mae.mx
@@ -34,7 +36,7 @@ Sitio completo con catálogo público, cotizaciones, inventario, clientes y pane
 
 ## Modelos y relaciones
 - `Category` — hasMany Products
-- `Product` — belongsTo Category, hasMany QuoteItems | campos: name, slug, description, price, stock, unit, image, active
+- `Product` — belongsTo Category, hasMany QuoteItems, hasMany StockMovements | campos: sku, name, slug, description, price, stock, unit, image, active
 - `Customer` — hasMany Quotes | campos: name, company, rfc, phone, email, address, city, zip_code, notes
 - `Quote` — belongsTo Customer, hasMany QuoteItems | campos: folio (MAE-0001), status (pendiente/confirmada/cancelada), total, notes, delivery_time, conditions
 - `QuoteItem` — belongsTo Quote, belongsTo Product | campos: quantity, unit_price, subtotal, delivery_time
@@ -47,9 +49,13 @@ Sitio completo con catálogo público, cotizaciones, inventario, clientes y pane
 - `Categories` — CRUD con modal
 - `Products` — CRUD con modal + subida de imágenes
 - `Customers` — CRUD con modal
+- `Inventory` — movimientos de stock (entradas/salidas)
 - `Quotes` — listado con cambio de status inline
 - `QuoteCreate` — formulario con items dinámicos
 - `QuoteShow` — detalle con cambio de status
+
+### Controladores HTTP (`app/Http/Controllers/Admin/`)
+- `QuotePdfController` — genera PDF de cotización con DomPDF
 
 ### Catálogo (`app/Livewire/Catalog/`)
 - `ProductCatalog` — grid con filtro por categoría y búsqueda
