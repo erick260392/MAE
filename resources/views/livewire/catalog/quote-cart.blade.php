@@ -1,6 +1,6 @@
 <div>
     {{-- Botón del carrito en navbar --}}
-    <button wire:click="$set('showCart', true)" class="relative flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors">
+    <button wire:click="$toggle('showCart')" class="relative flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         <span class="hidden sm:inline">Cotización</span>
         @if($count > 0)
@@ -95,14 +95,18 @@
                     <div class="flex items-center gap-3 py-2 border-b border-gray-50">
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-gray-800 truncate">{{ $item['name'] }}</p>
-                            <p class="text-xs text-gray-400">${{ number_format($item['price'], 2) }} / {{ $item['unit'] }}</p>
+                            <p class="text-xs text-gray-400">{{ $item['unit'] }}</p>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button wire:click="decrement({{ $productId }})" class="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold transition-colors">−</button>
-                            <span class="w-6 text-center text-sm font-medium">{{ $item['quantity'] }}</span>
-                            <button wire:click="increment({{ $productId }})" class="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold transition-colors">+</button>
+                            <button wire:click="decrement({{ $productId }})" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-base font-bold transition-colors">−</button>
+                            <input type="number"
+                                min="{{ $item['unit'] === 'metro' ? '0.1' : '1' }}"
+                                step="{{ $item['unit'] === 'metro' ? '0.1' : '1' }}"
+                                wire:change="setQuantity({{ $productId }}, $event.target.value)"
+                                value="{{ $item['quantity'] }}"
+                                class="w-16 text-center text-sm font-medium border border-gray-200 rounded-lg py-1 focus:outline-none focus:border-orange-400">
+                            <button wire:click="increment({{ $productId }})" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-base font-bold transition-colors">+</button>
                         </div>
-                        <p class="text-sm font-semibold text-gray-800 w-20 text-right">${{ number_format($item['price'] * $item['quantity'], 2) }}</p>
                         <button wire:click="remove({{ $productId }})" class="text-gray-300 hover:text-red-400 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
@@ -116,10 +120,6 @@
             {{-- Footer del panel --}}
             @if(!$showForm && !$submitted && !empty($items))
             <div class="px-6 py-4 border-t border-gray-100">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-sm text-gray-500">Total estimado</span>
-                    <span class="text-xl font-bold text-gray-900">${{ number_format($total, 2) }} <span class="text-sm font-normal text-gray-400">MXN</span></span>
-                </div>
                 <button wire:click="$set('showForm', true)"
                     class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg text-sm transition-colors mb-2">
                     Solicitar cotización

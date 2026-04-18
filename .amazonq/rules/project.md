@@ -36,7 +36,7 @@ Sitio completo con catálogo público, cotizaciones, inventario, clientes y pane
 
 ## Modelos y relaciones
 - `Category` — hasMany Products
-- `Product` — belongsTo Category, hasMany QuoteItems, hasMany StockMovements | campos: sku, name, slug, description, price, stock, unit, image, active
+- `Product` — belongsTo Category, hasMany QuoteItems, hasMany StockMovements | campos: sku, name, slug, description, application, price, stock, unit, image, active
 - `Customer` — hasMany Quotes | campos: name, company, rfc, phone, email, address, city, zip_code, notes
 - `Quote` — belongsTo Customer, hasMany QuoteItems | campos: folio (MAE-0001), status (pendiente/confirmada/cancelada), total, notes, delivery_time, conditions
 - `QuoteItem` — belongsTo Quote, belongsTo Product | campos: quantity, unit_price, subtotal, delivery_time
@@ -58,7 +58,7 @@ Sitio completo con catálogo público, cotizaciones, inventario, clientes y pane
 - `QuotePdfController` — genera PDF de cotización con DomPDF
 
 ### Catálogo (`app/Livewire/Catalog/`)
-- `ProductCatalog` — grid con filtro por categoría y búsqueda
+- `ProductCatalog` — grid con filtro por categoría y búsqueda, modal de detalle por producto
 - `QuoteCart` — carrito lateral con formulario de envío
 
 ## Layouts
@@ -91,5 +91,9 @@ Sitio completo con catálogo público, cotizaciones, inventario, clientes y pane
 - [x] Campos RFC y CP en clientes
 - [x] Tiempo de entrega por producto en cotizaciones
 - [x] Condiciones comerciales editables en cotizaciones
+- [x] Precios ocultos en catálogo público (solo cotizaciones)
+- [x] Modal de detalle de producto en catálogo (descripción + aplicación)
+- [x] Campo `application` en productos (descripción de uso/aplicación)
+- [x] Imágenes de productos con `object-contain` en catálogo
 - [ ] Notificaciones por WhatsApp (Twilio, postergado)
 - [ ] Configurar SMTP para envío real de emails

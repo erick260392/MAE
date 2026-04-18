@@ -74,90 +74,170 @@
                         <p class="text-lg">No se encontraron productos.</p>
                     </div>
                 @else
-                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                        @foreach($products as $product)
-                        <div wire:click="openDetail({{ $product->id }})"
-                            class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col cursor-pointer hover:shadow-md hover:border-orange-200 transition-all group">
-                            {{-- Imagen --}}
-                            <div class="bg-gray-50 h-48 flex items-center justify-center overflow-hidden p-3">
-                                @if($product->image)
-                                    <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}"
-                                        class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
-                                @else
-                                    <svg class="w-16 h-16 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                @endif
+                    <div
+                        x-data="{
+                            open: false,
+                            product: {},
+                            products: {{ \Illuminate\Support\Js::from($productsData) }},
+                            show(id) { this.product = this.products.find(p => p.id === id); this.open = true; },
+                            hide() { this.open = false; }
+                        }"
+                    >
+                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                            @foreach($products as $product)
+                            <div class="bg-slate-50 rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md hover:border-slate-300 transition-all group">
+                                <div class="p-4 flex items-center justify-between gap-3">
+                                    <span class="text-xs text-slate-500">{{ $product->unit === 'metro' ? 'Metro' : 'Pieza' }}</span>
+                                    <button type="button" @click="show({{ $product->id }})"
+                                        class="text-xs text-orange-600 hover:text-orange-700 font-medium">Ver detalle</button>
+                                </div>
+                                <div class="bg-slate-100 h-40 flex items-center justify-center overflow-hidden p-3 rounded-t-[28px] cursor-pointer" @click="show({{ $product->id }})">
+                                    @if($product->image)
+                                        <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}"
+                                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-[24px] border border-slate-200/60 bg-white/80">
+                                    @else
+                                        <svg class="w-16 h-16 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    @endif
+                                </div>
+                                <div class="p-4 flex flex-col flex-1">
+                                    <span class="text-xs text-orange-500 font-medium mb-1">{{ $product->category->name }}</span>
+                                    <h3 class="font-semibold text-slate-800 text-sm leading-snug mb-2">{{ $product->name }}</h3>
+
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <div class="flex items-center gap-1">
+                                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                            </svg>
+                                            <span class="text-xs text-slate-600">{{ $product->stock }} en stock</span>
+                                        </div>
+                                        @if($product->stock <= 5)
+                                            <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">¡Últimas unidades!</span>
+                                        @endif
+                                    </div>
+
+                                    @if($product->description)
+                                        <p class="text-xs text-slate-500 mb-3 line-clamp-2 leading-relaxed">{{ $product->description }}</p>
+                                    @endif
+
+                                    <div class="mt-auto space-y-3">
+                                        <div class="flex items-center justify-between text-xs text-slate-500">
+                                            <span>Envío rápido</span>
+                                            <span>Garantía 1 año</span>
+                                        </div>
+                                        <button @click.stop="$wire.addToCart({{ $product->id }}, 1)"
+                                            class="w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium px-3 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                            Cotizar
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                            @endforeach
+                        </div>
 
-                            <div class="p-4 flex flex-col flex-1">
-                                <span class="text-xs text-orange-500 font-medium mb-1">{{ $product->category->name }}</span>
-                                <h3 class="font-semibold text-gray-800 text-sm leading-snug mb-1">{{ $product->name }}</h3>
-                                @if($product->description)
-                                    <p class="text-xs text-gray-400 mb-3 line-clamp-2">{{ $product->description }}</p>
-                                @endif
+                        {{-- Modal detalle --}}
+                        <div x-show="open" x-transition.opacity class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" @click="hide()" style="display:none">
+                            <div class="bg-slate-50 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-200 max-h-[90vh] overflow-y-auto" @click.stop>
+                                <div class="bg-slate-100 h-48 flex items-center justify-center p-4">
+                                    <template x-if="product.image">
+                                        <img :src="product.image" :alt="product.name" class="w-full h-full object-contain">
+                                    </template>
+                                    <template x-if="!product.image">
+                                        <svg class="w-16 h-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    </template>
+                                </div>
+                                <div class="p-4">
+                                    <div class="flex items-start justify-between mb-4">
+                                        <div>
+                                            <span class="text-xs text-orange-500 font-medium" x-text="product.category"></span>
+                                            <h2 class="text-xl font-bold text-slate-900 mt-1" x-text="product.name"></h2>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button @click="$wire.addToCart(product.id, 1); hide()"
+                                                class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                Cotizar
+                                            </button>
+                                            <button @click="hide()"
+                                                class="border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                                                Cerrar
+                                            </button>
+                                        </div>
+                                    </div>
 
-                                <div class="mt-auto">
-                                    <button wire:click.stop="addToCart({{ $product->id }})"
-                                        class="w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        Cotizar
-                                    </button>
+                                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                        <div class="lg:col-span-2 space-y-4">
+                                            <div class="bg-white/90 border border-slate-200 rounded-2xl p-4 shadow-sm">
+                                                <div class="flex items-center justify-between gap-3 mb-4">
+                                                    <div>
+                                                        <p class="text-xs uppercase text-slate-500 tracking-[0.2em]">Cuerdas y conexión</p>
+                                                        <h3 class="text-lg font-semibold text-slate-900">Detalle técnico</h3>
+                                                    </div>
+                                                    <span class="text-xs font-semibold text-orange-700 bg-orange-100/90 px-2 py-1 rounded-full">Visual</span>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <template x-if="product.image">
+                                                        <div class="relative rounded-[24px] overflow-hidden h-40 bg-slate-50 border border-slate-200">
+                                                            <img :src="product.image" :alt="product.name + ' cuerda'" class="w-full h-full object-cover">
+                                                            <div class="absolute bottom-0 left-0 right-0 bg-slate-900/80 text-white text-xs uppercase tracking-[0.12em] px-3 py-2">Cuerdas</div>
+                                                        </div>
+                                                        <div class="relative rounded-[24px] overflow-hidden h-40 bg-slate-50 border border-slate-200">
+                                                            <img :src="product.image" :alt="product.name + ' entrada'" class="w-full h-full object-cover">
+                                                            <div class="absolute bottom-0 left-0 right-0 bg-slate-900/80 text-white text-xs uppercase tracking-[0.12em] px-3 py-2">Entrada</div>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="!product.image">
+                                                        <div class="rounded-[24px] h-40 bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-500 text-sm">Imagen de cuerdas</div>
+                                                        <div class="rounded-[24px] h-40 bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-500 text-sm">Imagen de entrada</div>
+                                                    </template>
+                                                </div>
+                                                <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                                                    <div>
+                                                        <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Descripción</p>
+                                                        <p class="text-slate-700 leading-relaxed" x-text="product.detailCuerdas"></p>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Aplicación</p>
+                                                        <p class="text-slate-700 leading-relaxed" x-text="product.detailConexion"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-4">
+                                            <div class="bg-white/90 border border-slate-200 rounded-2xl p-4 shadow-sm">
+                                                <div class="flex items-center justify-between gap-3 mb-4">
+                                                    <div>
+                                                        <p class="text-xs uppercase text-slate-500 tracking-[0.2em]">Manguera</p>
+                                                        <h3 class="text-base font-semibold text-slate-900">Características</h3>
+                                                    </div>
+                                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">Central</div>
+                                                </div>
+                                                <div class="space-y-3">
+                                                    <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+                                                        <p class="text-xs text-slate-500 uppercase">Material</p>
+                                                        <p class="mt-1 font-semibold text-slate-900" x-text="product.hoseMaterial"></p>
+                                                    </div>
+                                                    <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+                                                        <p class="text-xs text-slate-500 uppercase">Grueso</p>
+                                                        <p class="mt-1 font-semibold text-slate-900" x-text="product.hoseThickness"></p>
+                                                    </div>
+                                                    <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+                                                        <p class="text-xs text-slate-500 uppercase">Tipo</p>
+                                                        <p class="mt-1 font-semibold text-slate-900" x-text="product.hoseType"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        @endforeach
                     </div>
                 @endif
             </div>
 
         </div>
     </div>
-
-    {{-- Modal detalle producto --}}
-    @if($selectedProduct)
-    <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" wire:click="closeDetail">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden" wire:click.stop>
-            {{-- Imagen --}}
-            <div class="bg-gray-50 h-64 flex items-center justify-center p-6">
-                @if($selectedProduct->image)
-                    <img src="{{ Storage::url($selectedProduct->image) }}" alt="{{ $selectedProduct->name }}"
-                        class="w-full h-full object-contain">
-                @else
-                    <svg class="w-20 h-20 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                @endif
-            </div>
-
-            <div class="p-6">
-                <span class="text-xs text-orange-500 font-medium">{{ $selectedProduct->category->name }}</span>
-                <h2 class="text-xl font-bold text-gray-900 mt-1 mb-3">{{ $selectedProduct->name }}</h2>
-
-                @if($selectedProduct->description)
-                <div class="mb-3">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Descripción</p>
-                    <p class="text-sm text-gray-600">{{ $selectedProduct->description }}</p>
-                </div>
-                @endif
-
-                @if($selectedProduct->application)
-                <div class="mb-4">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Aplicación</p>
-                    <p class="text-sm text-gray-600">{{ $selectedProduct->application }}</p>
-                </div>
-                @endif
-
-                <div class="flex gap-3 mt-4">
-                    <button wire:click="closeDetail"
-                        class="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium px-4 py-2.5 rounded-lg transition-colors">
-                        Cerrar
-                    </button>
-                    <button wire:click="addToCart({{ $selectedProduct->id }}); closeDetail()"
-                        class="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Agregar a cotización
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
 
 </div>

@@ -14,44 +14,84 @@ use Livewire\Component;
 class QuoteCart extends Component
 {
     public array $items = [];
+
     public bool $showCart = false;
+
     public bool $showForm = false;
+
     public bool $submitted = false;
 
     public string $name = '';
+
     public string $phone = '';
+
     public string $company = '';
+
     public string $notes = '';
 
     #[On('cart-add')]
-    public function addProduct(int $productId): void
+    public function addProduct(int $productId, float $quantity = 1): void
     {
         if (isset($this->items[$productId])) {
-            $this->items[$productId]['quantity']++;
+            $this->items[$productId]['quantity'] += $quantity;
         } else {
             $product = Product::find($productId);
             $this->items[$productId] = [
-                'name'       => $product->name,
-                'unit'       => $product->unit,
-                'price'      => $product->price,
-                'quantity'   => 1,
+                'name' => $product->name,
+                'unit' => $product->unit,
+                'price' => $product->price,
+                'quantity' => $quantity,
             ];
         }
         $this->showCart = true;
     }
 
+    public function setQuantity(int $productId, float $quantity): void
+    {
+        if (! isset($this->items[$productId])) {
+            return;
+        }
+
+        $minimum = $this->items[$productId]['unit'] === 'metro' ? 0.1 : 1;
+
+        if ($quantity < $minimum) {
+            $this->remove($productId);
+
+            return;
+        }
+
+        if ($this->items[$productId]['unit'] === 'metro') {
+            $quantity = round($quantity, 1);
+        }
+
+        $this->items[$productId]['quantity'] = $quantity;
+    }
+
     public function increment(int $productId): void
     {
-        $this->items[$productId]['quantity']++;
+        if (! isset($this->items[$productId])) {
+            return;
+        }
+
+        $step = $this->items[$productId]['unit'] === 'metro' ? 0.1 : 1;
+        $this->items[$productId]['quantity'] = round($this->items[$productId]['quantity'] + $step, $this->items[$productId]['unit'] === 'metro' ? 1 : 0);
     }
 
     public function decrement(int $productId): void
     {
-        if ($this->items[$productId]['quantity'] <= 1) {
-            $this->remove($productId);
+        if (! isset($this->items[$productId])) {
             return;
         }
-        $this->items[$productId]['quantity']--;
+
+        $step = $this->items[$productId]['unit'] === 'metro' ? 0.1 : 1;
+
+        if ($this->items[$productId]['quantity'] <= $step) {
+            $this->remove($productId);
+
+            return;
+        }
+
+        $this->items[$productId]['quantity'] = round($this->items[$productId]['quantity'] - $step, $this->items[$productId]['unit'] === 'metro' ? 1 : 0);
     }
 
     public function remove(int $productId): void
@@ -65,16 +105,16 @@ class QuoteCart extends Component
 
     public function getTotal(): float
     {
-        return collect($this->items)->sum(fn($i) => $i['price'] * $i['quantity']);
+        return collect($this->items)->sum(fn ($i) => $i['price'] * $i['quantity']);
     }
 
     public function submitQuote(): void
     {
         $this->validate([
-            'name'    => 'required|min:2|max:150',
-            'phone'   => 'required|max:20',
+            'name' => 'required|min:2|max:150',
+            'phone' => 'required|max:20',
             'company' => 'nullable|max:150',
-            'notes'   => 'nullable|max:500',
+            'notes' => 'nullable|max:500',
         ]);
 
         $customer = Customer::firstOrCreate(
@@ -84,17 +124,17 @@ class QuoteCart extends Component
 
         $quote = Quote::create([
             'customer_id' => $customer->id,
-            'notes'       => $this->notes ?: null,
-            'total'       => $this->getTotal(),
+            'notes' => $this->notes ?: null,
+            'total' => $this->getTotal(),
         ]);
 
         foreach ($this->items as $productId => $item) {
             QuoteItem::create([
-                'quote_id'   => $quote->id,
+                'quote_id' => $quote->id,
                 'product_id' => $productId,
-                'quantity'   => $item['quantity'],
+                'quantity' => $item['quantity'],
                 'unit_price' => $item['price'],
-                'subtotal'   => $item['price'] * $item['quantity'],
+                'subtotal' => $item['price'] * $item['quantity'],
             ]);
         }
 
