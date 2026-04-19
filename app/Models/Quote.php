@@ -8,13 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Quote extends Model
 {
-    protected $fillable = ['customer_id', 'folio', 'status', 'total', 'notes', 'delivery_time', 'conditions'];
+    protected $fillable = ['customer_id', 'folio', 'status', 'total', 'notes', 'delivery_time', 'conditions', 'seen_at'];
+
+    protected $casts = ['seen_at' => 'datetime'];
 
     protected static function booted(): void
     {
         static::creating(function (Quote $quote) {
             $last = static::max('id') ?? 0;
-            $quote->folio = 'MAE-' . str_pad($last + 1, 4, '0', STR_PAD_LEFT);
+            $quote->folio = 'MAE-'.str_pad($last + 1, 4, '0', STR_PAD_LEFT);
         });
     }
 

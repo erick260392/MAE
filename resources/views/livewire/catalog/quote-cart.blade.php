@@ -1,6 +1,7 @@
-<div>
+<div x-data="{ open: $wire.entangle('showCart') }">
+
     {{-- Botón del carrito en navbar --}}
-    <button wire:click="$toggle('showCart')" class="relative flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors">
+    <button @click="open = true" class="relative flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         <span class="hidden sm:inline">Cotización</span>
         @if($count > 0)
@@ -9,16 +10,17 @@
     </button>
 
     {{-- Panel lateral --}}
-    @if($showCart)
-    <div class="fixed inset-0 z-50 flex justify-end">
-        {{-- Overlay --}}
-        <div wire:click="$set('showCart', false)" class="absolute inset-0 bg-black/50"></div>
+    <div x-show="open" x-transition.opacity class="fixed inset-0 z-50 flex justify-end" style="display:none">
 
-        {{-- Panel --}}
-        <div class="relative bg-white w-full max-w-md flex flex-col shadow-2xl">
+        {{-- Overlay: cierra solo al hacer click directo en él --}}
+        <div class="absolute inset-0 bg-black/50" @click="open = false"></div>
+
+        {{-- Panel: detiene propagación para que el overlay no interfiera --}}
+        <div class="relative bg-white w-full max-w-md flex flex-col shadow-2xl" @click.stop>
+
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                 <h2 class="font-semibold text-gray-800">Mi cotización</h2>
-                <button wire:click="$set('showCart', false)" class="text-gray-400 hover:text-gray-600">
+                <button @click="open = false" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -51,28 +53,28 @@
                         Volver
                     </button>
                     <h3 class="font-semibold text-gray-800 mb-4">Tus datos de contacto</h3>
-                    <form wire:submit="submitQuote" class="space-y-3">
+                    <form wire:submit.prevent="submitQuote" class="space-y-3">
                         <div>
                             <label class="block text-sm text-gray-600 mb-1">Nombre <span class="text-red-500">*</span></label>
                             <input wire:model="name" type="text"
-                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400">
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-orange-400">
                             @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block text-sm text-gray-600 mb-1">Teléfono / WhatsApp <span class="text-red-500">*</span></label>
                             <input wire:model="phone" type="text"
-                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400">
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-orange-400">
                             @error('phone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block text-sm text-gray-600 mb-1">Empresa (opcional)</label>
                             <input wire:model="company" type="text"
-                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400">
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-orange-400">
                         </div>
                         <div>
                             <label class="block text-sm text-gray-600 mb-1">Notas (opcional)</label>
                             <textarea wire:model="notes" rows="2"
-                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-orange-400"
                                 placeholder="Medidas especiales, urgencia, etc."></textarea>
                         </div>
                         <button type="submit"
@@ -98,16 +100,11 @@
                             <p class="text-xs text-gray-400">{{ $item['unit'] }}</p>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button wire:click="decrement({{ $productId }})" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-base font-bold transition-colors">−</button>
-                            <input type="number"
-                                min="{{ $item['unit'] === 'metro' ? '0.1' : '1' }}"
-                                step="{{ $item['unit'] === 'metro' ? '0.1' : '1' }}"
-                                wire:change="setQuantity({{ $productId }}, $event.target.value)"
-                                value="{{ $item['quantity'] }}"
-                                class="w-16 text-center text-sm font-medium border border-gray-200 rounded-lg py-1 focus:outline-none focus:border-orange-400">
-                            <button wire:click="increment({{ $productId }})" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-base font-bold transition-colors">+</button>
+                            <button wire:click="decrement({{ $productId }})" type="button" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-base font-bold transition-colors">−</button>
+                            <span class="w-10 text-center text-sm font-medium text-gray-800">{{ $item['quantity'] }}</span>
+                            <button wire:click="increment({{ $productId }})" type="button" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-base font-bold transition-colors">+</button>
                         </div>
-                        <button wire:click="remove({{ $productId }})" class="text-gray-300 hover:text-red-400 transition-colors">
+                        <button wire:click="remove({{ $productId }})" type="button" class="text-gray-300 hover:text-red-400 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -117,10 +114,10 @@
                 @endif
             </div>
 
-            {{-- Footer del panel --}}
+            {{-- Footer --}}
             @if(!$showForm && !$submitted && !empty($items))
             <div class="px-6 py-4 border-t border-gray-100">
-                <button wire:click="$set('showForm', true)"
+                <button wire:click="$set('showForm', true)" type="button"
                     class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg text-sm transition-colors mb-2">
                     Solicitar cotización
                 </button>
@@ -131,7 +128,7 @@
                 </a>
             </div>
             @endif
+
         </div>
     </div>
-    @endif
 </div>

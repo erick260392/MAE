@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Quote;
 use App\Models\QuoteItem;
 use App\Notifications\NewQuoteReceived;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -143,8 +144,12 @@ class QuoteCart extends Component
         $this->submitted = true;
         $this->reset(['name', 'phone', 'company', 'notes']);
 
-        Notification::route('mail', 'conexiones.mangueras@hotmail.com')
-            ->notify(new NewQuoteReceived($quote));
+        try {
+            Notification::route('mail', 'conexiones.mangueras@hotmail.com')
+                ->notifyNow(new NewQuoteReceived($quote));
+        } catch (\Throwable $e) {
+            Log::error('Error enviando notificación: '.$e->getMessage());
+        }
     }
 
     public function render()

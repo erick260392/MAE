@@ -8,6 +8,7 @@ use Livewire\Component;
 class Login extends Component
 {
     public string $email = '';
+
     public string $password = '';
 
     public function login()
@@ -17,12 +18,15 @@ class Login extends Component
             'password' => 'required',
         ]);
 
-        if (!Auth::attempt(['email' => $this->email, 'password' => $this->password])) {
+        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password])) {
             $this->addError('email', 'Credenciales incorrectas.');
+
             return;
         }
 
-        return redirect()->route('admin.dashboard');
+        session()->regenerate();
+
+        return $this->redirect(route('admin.dashboard'), navigate: false);
     }
 
     public function render()
