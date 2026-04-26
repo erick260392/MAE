@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
 
 arch('models')
-    ->expect('App\Models')
-    ->toExtend('Illuminate\Database\Eloquent\Model')
+    ->expect('App\\Models')
+    ->toExtend('Illuminate\\Database\\Eloquent\\Model')
     ->not->toBeAbstract();
 
 arch('livewire')
-    ->expect('App\Livewire')
-    ->toExtend('Livewire\Component');
+    ->expect('App\\Livewire')
+    ->toExtend('Livewire\\Component');
 
 arch('globals')
     ->expect(['dd', 'dump', 'ray'])
@@ -23,6 +23,7 @@ test('models define mass assignment protection', function () {
         ->map(fn ($file) => 'App\\Models\\'.$file->getFilenameWithoutExtension())
         ->filter(fn (string $class) => is_subclass_of($class, Model::class));
 
+    expect(true)->toBeTrue();
     expect($modelClasses)->not->toBeEmpty();
 
     $modelClasses->each(function (string $class): void {
@@ -36,3 +37,4 @@ test('models define mass assignment protection', function () {
             ->toBeTrue("Failed asserting that [{$class}] defines fillable or guarded protection.");
     });
 });
+

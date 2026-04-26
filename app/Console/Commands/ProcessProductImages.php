@@ -27,8 +27,15 @@ class ProcessProductImages extends Command
         }
 
         $extensions = ['jpg', 'jpeg', 'png', 'webp'];
-        $files = collect(scandir($directory))
-            ->filter(fn ($f) => in_array(strtolower(pathinfo($f, PATHINFO_EXTENSION)), $extensions))
+        $files = collect(
+            iterator_to_array(
+                new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS)
+                )
+            )
+        )
+            ->filter(fn ($f) => in_array(strtolower($f->getExtension()), $extensions))
+            ->map(fn ($f) => $f->getPathname())
             ->values();
 
         if ($files->isEmpty()) {
@@ -39,39 +46,53 @@ class ProcessProductImages extends Command
         $this->info("Procesando {$files->count()} imagen(es) en: {$directory}");
         $dryRun && $this->warn('Modo dry-run: no se modificará ningún archivo.');
 
-        $manager = new ImageManager(Driver::class);
-        $bar     = $this->output->createProgressBar($files->count());
+        $manager  = new ImageManager(Driver::class);
+        $total    = $files->count();
+        $done     = 0;
+        $errors   = 0;
+        $start    = microtime(true);
+
+        $bar = $this->output->createProgressBar($total);
+        $bar->setFormat(
+            " %current%/%max% [%bar%] %percent:3s%%  ⏱ %elapsed:6s% / ~%estimated:-6s%  💾 %memory:6s%\n  📄 %message%"
+        );
+        $bar->setMessage('Iniciando...');
         $bar->start();
 
-        foreach ($files as $filename) {
-            $path = $directory . '/' . $filename;
+        foreach ($files as $path) {
+            $filename = basename($path);
+            $bar->setMessage($filename);
 
             try {
                 $image  = $manager->decode($path);
                 $w      = $image->width();
                 $h      = $image->height();
 
-                // Lienzo negro del mismo tamaño
                 $canvas = $manager->createImage($w, $h);
                 $canvas->fill('#000000');
-
-                // Pegar imagen original encima centrada
                 $canvas->insert($image, 0, 0, Alignment::CENTER);
 
                 if (! $dryRun) {
                     $canvas->encode(new \Intervention\Image\Encoders\JpegEncoder($quality))->save($path);
                 }
+
+                $done++;
             } catch (\Throwable $e) {
-                $this->newLine();
-                $this->warn("Error en {$filename}: {$e->getMessage()}");
+                $errors++;
+                $bar->setMessage("⚠ Error: {$filename}");
+                $this->newLine(2);
+                $this->warn("  {$filename}: {$e->getMessage()}");
             }
 
             $bar->advance();
         }
 
+        $bar->setMessage('¡Completado!');
         $bar->finish();
-        $this->newLine();
-        $this->info('¡Listo!');
+
+        $elapsed = round(microtime(true) - $start, 1);
+        $this->newLine(2);
+        $this->info("✅ {$done}/{$total} imágenes procesadas en {$elapsed}s" . ($errors ? " — ⚠ {$errors} errores" : ''));
 
         return self::SUCCESS;
     }
