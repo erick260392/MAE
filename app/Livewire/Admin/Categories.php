@@ -3,16 +3,18 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Category;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Categories extends Component
 {
     public string $search = '';
+
     public bool $showModal = false;
+
     public ?int $editingId = null;
 
     public string $name = '';
+
     public string $description = '';
 
     public function openCreate(): void
@@ -38,7 +40,6 @@ class Categories extends Component
 
         $data = [
             'name' => $this->name,
-            'slug' => Str::slug($this->name),
             'description' => $this->description,
         ];
 
@@ -61,7 +62,7 @@ class Categories extends Component
     {
         $categories = Category::query()
             ->withCount('products')
-            ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))
+            ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
             ->orderBy('name')
             ->get();
 

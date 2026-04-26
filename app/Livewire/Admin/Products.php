@@ -4,7 +4,6 @@ namespace App\Livewire\Admin;
 
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -13,19 +12,31 @@ class Products extends Component
     use WithFileUploads;
 
     public string $search = '';
+
     public string $filterCategory = '';
+
     public bool $showModal = false;
+
     public ?int $editingId = null;
 
     public string $name = '';
+
     public string $description = '';
+
     public string $application = '';
+
     public string $price = '';
+
     public string $stock = '';
+
     public string $unit = 'pieza';
+
     public ?int $category_id = null;
+
     public bool $active = true;
+
     public $image;
+
     public ?string $currentImage = null;
 
     public function openCreate(): void
@@ -55,26 +66,25 @@ class Products extends Component
     public function save(): void
     {
         $this->validate([
-            'name'        => 'required|min:2|max:150',
-            'price'       => 'required|numeric|min:0',
-            'stock'       => 'required|integer|min:0',
-            'unit'        => 'required',
+            'name' => 'required|min:2|max:150',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'unit' => 'required',
             'category_id' => 'required|exists:categories,id',
             'description' => 'nullable|max:500',
             'application' => 'nullable|max:500',
-            'image'       => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:2048',
         ]);
 
         $data = [
-            'name'        => $this->name,
-            'slug'        => Str::slug($this->name),
+            'name' => $this->name,
             'description' => $this->description,
             'application' => $this->application,
-            'price'       => $this->price,
-            'stock'       => $this->stock,
-            'unit'        => $this->unit,
+            'price' => $this->price,
+            'stock' => $this->stock,
+            'unit' => $this->unit,
             'category_id' => $this->category_id,
-            'active'      => $this->active,
+            'active' => $this->active,
         ];
 
         if ($this->image) {
@@ -93,7 +103,7 @@ class Products extends Component
 
     public function toggleActive(Product $product): void
     {
-        $product->update(['active' => !$product->active]);
+        $product->update(['active' => ! $product->active]);
     }
 
     public function delete(Product $product): void
@@ -104,13 +114,13 @@ class Products extends Component
     public function render()
     {
         $products = Product::with('category')
-            ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))
-            ->when($this->filterCategory, fn($q) => $q->where('category_id', $this->filterCategory))
+            ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
+            ->when($this->filterCategory, fn ($q) => $q->where('category_id', $this->filterCategory))
             ->orderBy('name')
             ->get();
 
         return view('livewire.admin.products', [
-            'products'   => $products,
+            'products' => $products,
             'categories' => Category::orderBy('name')->get(),
         ])->layout('layouts.admin', ['title' => 'Productos']);
     }
