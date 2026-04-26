@@ -24,12 +24,19 @@ class NewQuoteReceived extends Notification
 
         $message = (new MailMessage)
             ->subject("Nueva cotización {$quote->folio} — {$quote->customer->name}")
-            ->greeting("¡Nueva cotización recibida!")
-            ->line("Se ha recibido una nueva cotización desde el catálogo público.")
+            ->greeting('¡Nueva cotización recibida!')
+            ->line('Se ha recibido una nueva cotización desde el catálogo público.')
             ->line("**Folio:** {$quote->folio}")
-            ->line("**Cliente:** {$quote->customer->name}" . ($quote->customer->company ? " ({$quote->customer->company})" : ''))
-            ->line("**Teléfono:** {$quote->customer->phone}")
-            ->line("**Total estimado:** $" . number_format($quote->total, 2) . " MXN");
+            ->line("**Cliente:** {$quote->customer->name}".($quote->customer->company ? " ({$quote->customer->company})" : ''))
+            ->line("**Teléfono:** {$quote->customer->phone}");
+
+        if ($quote->customer->email) {
+            $message->line("**Correo:** {$quote->customer->email}");
+        }
+
+        if ($quote->customer->city) {
+            $message->line("**Ciudad:** {$quote->customer->city}");
+        }
 
         if ($quote->notes) {
             $message->line("**Notas:** {$quote->notes}");
@@ -38,7 +45,11 @@ class NewQuoteReceived extends Notification
         $message->line('**Productos solicitados:**');
 
         foreach ($quote->items as $item) {
-            $message->line("- {$item->product->name} × {$item->quantity} {$item->product->unit} = $" . number_format($item->subtotal, 2));
+            $message->line("- {$item->product->name} × {$item->quantity} {$item->product->unit}");
+
+            if ($item->notes) {
+                $message->line("  Detalles: {$item->notes}");
+            }
         }
 
         return $message

@@ -32,6 +32,9 @@
                 @if($quote->customer->email)
                     <p class="text-gray-700">{{ $quote->customer->email }}</p>
                 @endif
+                @if($quote->customer->city)
+                    <p class="text-gray-500">{{ $quote->customer->city }}</p>
+                @endif
             </div>
             @if($quote->notes)
             <div class="col-span-2">
@@ -56,7 +59,12 @@
             <tbody class="divide-y divide-gray-50">
                 @foreach($quote->items as $item)
                 <tr>
-                    <td class="px-6 py-3 text-gray-800">{{ $item->product->name }}</td>
+                    <td class="px-6 py-3 text-gray-800">
+                        <p>{{ $item->product->name }}</p>
+                        @if($item->notes)
+                            <p class="mt-1 text-xs text-gray-500">{{ $item->notes }}</p>
+                        @endif
+                    </td>
                     <td class="px-6 py-3 text-right text-gray-600">${{ number_format($item->unit_price, 2) }}</td>
                     <td class="px-6 py-3 text-right text-gray-600">{{ $item->quantity }} {{ $item->product->unit }}</td>
                     <td class="px-6 py-3 text-right font-medium text-gray-800">${{ number_format($item->subtotal, 2) }}</td>

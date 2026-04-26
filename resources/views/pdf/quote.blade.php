@@ -65,6 +65,7 @@
                 <div class="brand-sub">Hidráulicas y Neumáticas — Soluciones Industriales desde 2015</div>
                 <div class="brand-sub">RFC: MOME8902246H8 | Benito Juárez 33-29, Habitacional, 54038 Tlalnepantla, Méx.</div>
                 <div class="brand-sub">Tel: 55 4230 5373 | Oficina: 55 5317 7681 | conexiones.mangueras@hotmail.com</div>
+                <div class="brand-sub">Facebook: facebook.com/profile.php?id=61563654431552</div>
             </div>
         </div>
         <div style="text-align:right;">
@@ -193,7 +194,7 @@
     </div>
 
     <div class="contact-footer">
-        Mangueras y Conexiones MAE &nbsp;|&nbsp; RFC: MOME8902246H8 &nbsp;|&nbsp; Benito Juárez 33-29, Habitacional, 54038 Tlalnepantla, Méx. &nbsp;|&nbsp; Tel: 55 4230 5373 &nbsp;|&nbsp; conexiones.mangueras@hotmail.com
+        Mangueras y Conexiones MAE &nbsp;|&nbsp; RFC: MOME8902246H8 &nbsp;|&nbsp; Benito Juárez 33-29, Habitacional, 54038 Tlalnepantla, Méx. &nbsp;|&nbsp; Tel: 55 4230 5373 &nbsp;|&nbsp; conexiones.mangueras@hotmail.com &nbsp;|&nbsp; Facebook: facebook.com/profile.php?id=61563654431552
     </div>
 
 </body>

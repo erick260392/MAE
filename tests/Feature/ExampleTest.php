@@ -4,7 +4,6 @@ use App\Livewire\Admin\Categories;
 use App\Livewire\Admin\Customers;
 use App\Livewire\Admin\Inventory;
 use App\Livewire\Admin\Login;
-use App\Livewire\Admin\QuoteCreate;
 use App\Livewire\Admin\Quotes;
 use App\Livewire\Catalog\ProductCatalog;
 use App\Livewire\Catalog\QuoteCart;
@@ -16,6 +15,7 @@ use App\Models\QuoteItem;
 use App\Models\StockMovement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -295,12 +295,26 @@ describe('QuoteCart Livewire', function () {
     });
 
     test('envío de cotización valida campos requeridos', function () {
+        $cat = Category::create(['name' => 'Cat', 'slug' => 'cat']);
+        $product = Product::create(['category_id' => $cat->id, 'name' => 'P1', 'slug' => 'p1', 'price' => 50, 'stock' => 10, 'unit' => 'pieza', 'active' => true]);
+
         Livewire::test(QuoteCart::class)
+            ->dispatch('cart-add', productId: $product->id)
             ->call('submitQuote')
             ->assertHasErrors(['name', 'phone']);
     });
 
-    test('envío de cotización crea quote y customer en BD', function () {
+    test('avanza al paso de contacto cuando hay productos en el carrito', function () {
+        $cat = Category::create(['name' => 'Cat', 'slug' => 'cat']);
+        $product = Product::create(['category_id' => $cat->id, 'name' => 'P1', 'slug' => 'p1', 'price' => 50, 'stock' => 10, 'unit' => 'pieza', 'active' => true]);
+
+        Livewire::test(QuoteCart::class)
+            ->dispatch('cart-add', productId: $product->id)
+            ->call('goToContactStep')
+            ->assertSet('currentStep', 2);
+    });
+
+    test('correo inválido muestra error al enviar cotización', function () {
         $cat = Category::create(['name' => 'Cat', 'slug' => 'cat']);
         $product = Product::create(['category_id' => $cat->id, 'name' => 'P1', 'slug' => 'p1', 'price' => 50, 'stock' => 10, 'unit' => 'pieza', 'active' => true]);
 
@@ -308,12 +322,38 @@ describe('QuoteCart Livewire', function () {
             ->dispatch('cart-add', productId: $product->id)
             ->set('name', 'Juan Pérez')
             ->set('phone', '5512345678')
+            ->set('email', 'correo-invalido')
             ->call('submitQuote')
-            ->assertSet('submitted', true);
+            ->assertHasErrors(['email']);
+    });
+
+    test('envío de cotización crea quote, customer y detalles por producto en BD', function () {
+        Notification::fake();
+
+        $cat = Category::create(['name' => 'Cat', 'slug' => 'cat']);
+        $product = Product::create(['category_id' => $cat->id, 'name' => 'P1', 'slug' => 'p1', 'price' => 50, 'stock' => 10, 'unit' => 'pieza', 'active' => true]);
+
+        Livewire::test(QuoteCart::class)
+            ->dispatch('cart-add', productId: $product->id)
+            ->call('goToContactStep')
+            ->set('name', 'Juan Pérez')
+            ->set('phone', '5512345678')
+            ->set('company', 'MAE Cliente')
+            ->set('email', 'juan@example.com')
+            ->set('city', 'Tlalnepantla')
+            ->set('notes', 'Necesito entrega rápida.')
+            ->call('updateItemNotes', $product->id, 'Manguera de 1/2 con conexión recta.')
+            ->call('submitQuote')
+            ->assertSet('submitted', true)
+            ->assertSet('submittedQuoteFolio', 'MAE-0001');
 
         expect(Customer::count())->toBe(1)
             ->and(Quote::count())->toBe(1)
-            ->and(QuoteItem::count())->toBe(1);
+            ->and(QuoteItem::count())->toBe(1)
+            ->and(Customer::first()->email)->toBe('juan@example.com')
+            ->and(Customer::first()->city)->toBe('Tlalnepantla')
+            ->and(Quote::first()->notes)->toBe('Necesito entrega rápida.')
+            ->and(QuoteItem::first()->notes)->toBe('Manguera de 1/2 con conexión recta.');
     });
 });
 
