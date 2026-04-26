@@ -2,49 +2,49 @@
 
     {{-- Tarjetas de estadísticas --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <p class="text-sm text-gray-500">Productos</p>
-            <p class="text-3xl font-bold text-gray-900 mt-1">{{ $totalProducts }}</p>
+        <div class="mae-stat">
+            <p class="mae-stat-label">Productos</p>
+            <p class="mae-stat-value">{{ $totalProducts }}</p>
         </div>
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <p class="text-sm text-gray-500">Clientes</p>
-            <p class="text-3xl font-bold text-gray-900 mt-1">{{ $totalCustomers }}</p>
+        <div class="mae-stat">
+            <p class="mae-stat-label">Clientes</p>
+            <p class="mae-stat-value">{{ $totalCustomers }}</p>
         </div>
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <p class="text-sm text-gray-500">Cotizaciones pendientes</p>
-            <p class="text-3xl font-bold text-orange-500 mt-1">{{ $pendingQuotes }}</p>
+        <div class="mae-stat">
+            <p class="mae-stat-label">Cotizaciones pendientes</p>
+            <p class="mae-stat-value text-mae-gold">{{ $pendingQuotes }}</p>
         </div>
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <p class="text-sm text-gray-500">Total cotizaciones</p>
-            <p class="text-3xl font-bold text-gray-900 mt-1">{{ $totalQuotes }}</p>
+        <div class="mae-stat">
+            <p class="mae-stat-label">Total cotizaciones</p>
+            <p class="mae-stat-value">{{ $totalQuotes }}</p>
         </div>
     </div>
 
     {{-- Cotizaciones recientes --}}
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 class="font-semibold text-gray-800">Cotizaciones recientes</h2>
-            <a href="{{ route('admin.quotes') }}" class="text-sm text-orange-500 hover:underline">Ver todas</a>
+    <div class="mae-panel overflow-hidden">
+        <div class="flex items-center justify-between border-b border-white/10 px-6 py-4">
+            <h2 class="font-display text-2xl font-bold uppercase tracking-[0.16em] text-white">Cotizaciones recientes</h2>
+            <a href="{{ route('admin.quotes') }}" class="text-sm font-semibold text-mae-gold hover:text-mae-gold-soft">Ver todas</a>
         </div>
-        <div class="divide-y divide-gray-50">
+        <div class="divide-y divide-white/8">
             @forelse($recentQuotes as $quote)
-            <div class="px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center justify-between px-6 py-4">
                 <div>
-                    <p class="text-sm font-medium text-gray-800">{{ $quote->folio }}</p>
-                    <p class="text-xs text-gray-500">{{ $quote->customer->name }}</p>
+                    <p class="font-display text-lg font-bold uppercase tracking-[0.14em] text-white">{{ $quote->folio }}</p>
+                    <p class="text-sm text-[#b7c6da]">{{ $quote->customer->name }}</p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <span class="text-sm font-medium text-gray-700">${{ number_format($quote->total, 2) }}</span>
+                    <span class="text-sm font-medium text-white">${{ number_format($quote->total, 2) }}</span>
                     <span @class([
-                        'text-xs px-2 py-1 rounded-full font-medium',
-                        'bg-yellow-100 text-yellow-700' => $quote->status === 'pendiente',
-                        'bg-green-100 text-green-700' => $quote->status === 'confirmada',
-                        'bg-red-100 text-red-700' => $quote->status === 'cancelada',
+                        'mae-badge',
+                        'border-yellow-400/30 bg-yellow-400/12 text-yellow-300' => $quote->status === 'pendiente',
+                        'border-green-400/30 bg-green-400/12 text-green-300' => $quote->status === 'confirmada',
+                        'border-red-400/30 bg-red-400/12 text-red-300' => $quote->status === 'cancelada',
                     ])>{{ ucfirst($quote->status) }}</span>
                 </div>
             </div>
             @empty
-            <p class="px-6 py-4 text-sm text-gray-400">No hay cotizaciones aún.</p>
+            <p class="px-6 py-4 text-sm text-[#92a8c5]">No hay cotizaciones aún.</p>
             @endforelse
         </div>
     </div>
