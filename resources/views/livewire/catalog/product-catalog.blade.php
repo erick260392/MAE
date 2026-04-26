@@ -101,10 +101,10 @@
                                 class="text-xs text-blue-600 hover:text-blue-700 font-semibold">Ver detalle</button>
                         </div>
 
-                        <div class="bg-gray-50 h-48 flex items-center justify-center overflow-hidden p-4 cursor-pointer" @click="show({{ $product->id }})">
+                        <div class="bg-white h-48 flex items-center justify-center overflow-hidden p-4 cursor-pointer border-b border-gray-100" @click="show({{ $product->id }})">
                             @if($product->image)
                                 <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}"
-                                    class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
+                                    class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-md">
                             @else
                                 <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             @endif
@@ -118,19 +118,15 @@
                                     <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                                     <span>{{ $product->stock }} en stock</span>
                                 </div>
-                                <div class="flex items-center justify-between text-xs text-gray-600">
+                                <div class="flex items-center text-xs text-gray-600">
                                     <span class="flex items-center gap-1">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
                                         Envío rápido
                                     </span>
-                                    <span class="flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        Garantía 1 año
-                                    </span>
                                 </div>
                             </div>
 
-                            <button @click.stop="$wire.addToCart({{ $product->id }}, 1)"
+                            <button @click.stop="$wire.addToCart({{ $product->id }})"
                                 class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-3 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                 Cotizar
@@ -145,9 +141,9 @@
                     <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl overflow-hidden border border-gray-200" @click.stop>
                         {{-- Header con imagen y badge --}}
                         <div class="relative">
-                            <div class="bg-gradient-to-br from-blue-600 to-blue-800 h-40 flex items-center justify-center p-3 relative">
+                            <div class="bg-white h-48 flex items-center justify-center p-6 relative border-b border-gray-100">
                                 <template x-if="product.image">
-                                    <img :src="product.image" :alt="product.name" class="w-full h-full object-contain">
+                                    <img :src="product.image" :alt="product.name" class="max-h-full max-w-full object-contain drop-shadow-md">
                                 </template>
                                 <template x-if="!product.image">
                                     <svg class="w-24 h-24 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -215,13 +211,24 @@
                                 </ul>
                             </div>
 
+                            {{-- Aplicaciones --}}
+                            <template x-if="product.application">
+                            <div class="bg-orange-50 rounded-lg p-3 mb-4">
+                                <h3 class="text-xs font-bold text-gray-900 uppercase mb-2 flex items-center gap-2">
+                                    <svg class="w-3 h-3 text-orange-600" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+                                    Aplicación
+                                </h3>
+                                <p class="text-sm text-gray-700 leading-relaxed" x-text="product.application"></p>
+                            </div>
+                            </template>
+
                             {{-- Botones de acción --}}
                             <div class="flex gap-2 mt-4">
                                 <button @click="hide()"
                                     class="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-4 py-2 rounded-lg transition-colors text-sm">
                                     Cerrar
                                 </button>
-                                <button @click.stop="$wire.addToCart(product.id, 1); hide()"
+                                <button @click.stop="$wire.addToCart(product.id); hide()"
                                     class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg text-sm">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                     Cotizar
