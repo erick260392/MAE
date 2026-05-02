@@ -2,21 +2,34 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Customer;
-use App\Models\Product;
-use App\Models\Quote;
+use App\Services\DashboardStatsService;
 use Livewire\Component;
 
 class Dashboard extends Component
 {
+    public function __construct(private DashboardStatsService $stats) {}
+
     public function render()
     {
         return view('livewire.admin.dashboard', [
-            'totalProducts' => Product::count(),
-            'totalCustomers' => Customer::count(),
-            'pendingQuotes' => Quote::where('status', 'pendiente')->count(),
-            'totalQuotes' => Quote::count(),
-            'recentQuotes' => Quote::with('customer')->latest()->take(5)->get(),
+            // Overall metrics
+            'stats' => $this->stats->getOverallStats(),
+            'conversionRate' => $this->stats->getConversionRate(),
+            'averageQuoteValue' => $this->stats->getAverageQuoteValue(),
+
+            // Chart data
+            'quotesByStatus' => $this->stats->getQuotesByStatus(),
+            'monthlyQuotes' => $this->stats->getMonthlyQuotesData(),
+            'revenueByStatus' => $this->stats->getRevenueByStatus(),
+
+            // Lists
+            'recentQuotes' => $this->stats->getRecentQuotes(5),
+            'topCustomers' => $this->stats->getTopCustomers(5),
+            'lowStockProducts' => $this->stats->getLowStockProducts(5),
+            'topProducts' => $this->stats->getTopProducts(5),
+
+            // Additional metrics
+            'activeCategories' => $this->stats->getActiveCategoriesCount(),
         ])->layout('layouts.admin', ['title' => 'Dashboard']);
     }
 }
