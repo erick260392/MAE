@@ -7,22 +7,28 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="text-white" x-data="{ sidebarOpen: false }">
+<body class="text-white" x-data="{ sidebarOpen: false, userMenuOpen: false }">
 
-<div class="flex h-screen overflow-hidden">
+<div class="relative flex h-screen overflow-hidden">
+    <div class="pointer-events-none fixed inset-0 opacity-80">
+        <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-mae-gold/70 to-transparent"></div>
+        <div class="absolute left-80 top-20 h-72 w-72 rounded-full bg-mae-gold/8 blur-3xl"></div>
+        <div class="absolute right-10 top-1/3 h-96 w-96 rounded-full bg-blue-500/8 blur-3xl"></div>
+    </div>
 
     {{-- Overlay mobile --}}
     <div x-show="sidebarOpen" x-cloak
         @click="sidebarOpen = false"
-        class="fixed inset-0 bg-black/50 z-20 lg:hidden"></div>
+        x-transition.opacity
+        class="fixed inset-0 z-20 bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
     {{-- Sidebar --}}
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-        class="fixed lg:static lg:translate-x-0 z-30 flex h-full w-72 shrink-0 flex-col border-r border-white/10 bg-[#050d19]/92 text-white transition-transform duration-300">
+        class="fixed lg:static lg:translate-x-0 z-30 flex h-full w-72 shrink-0 flex-col border-r border-white/10 bg-[#050d19]/92 text-white shadow-[24px_0_80px_rgba(0,0,0,0.28)] backdrop-blur-2xl transition-transform duration-300">
 
-        <div class="border-b border-white/10 px-6 py-6">
+        <div class="relative border-b border-white/10 px-6 py-6">
             <div class="flex items-center gap-4">
-                <div class="rounded-2xl border border-mae-gold/40 bg-white/6 p-2">
+                <div class="rounded-2xl border border-mae-gold/40 bg-white/6 p-2 shadow-[0_0_30px_rgba(244,179,26,0.12)]">
                     @if(file_exists(public_path('images/logo.png')))
                         <img src="/images/logo.png" alt="MAE" class="h-10 w-10 object-contain">
                     @endif
@@ -32,13 +38,23 @@
                     <p class="font-display text-xs font-semibold uppercase tracking-[0.26em] text-mae-gold">Panel industrial</p>
                 </div>
             </div>
+            <div class="mt-5 rounded-xl border border-white/10 bg-white/6 px-4 py-3">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-semibold text-white">{{ auth()->user()->name }}</p>
+                        <p class="text-xs text-[#8fa7c5]">Sesión activa</p>
+                    </div>
+                    <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-green-400 shadow-[0_0_18px_rgba(74,222,128,0.7)]"></span>
+                </div>
+            </div>
             {{-- Cerrar sidebar en mobile --}}
             <button @click="sidebarOpen = false" class="absolute right-4 top-4 text-[#9db1cc] hover:text-white lg:hidden">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
-        <nav class="flex-1 space-y-2 overflow-y-auto px-4 py-6">
+        <nav class="mae-scrollbar flex-1 space-y-2 overflow-y-auto px-4 py-6">
+            <p class="px-3 pb-2 font-display text-xs font-bold uppercase tracking-[0.22em] text-[#6f88aa]">Principal</p>
             <a href="{{ route('admin.dashboard') }}" @click="sidebarOpen = false"
                @class([
                    'mae-admin-link',
@@ -48,6 +64,7 @@
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 Dashboard
             </a>
+            <p class="px-3 pb-2 pt-4 font-display text-xs font-bold uppercase tracking-[0.22em] text-[#6f88aa]">Operación</p>
             <a href="{{ route('admin.quotes') }}" @click="sidebarOpen = false"
                @class([
                    'mae-admin-link',
@@ -100,6 +117,10 @@
         </nav>
 
         <div class="border-t border-white/10 px-4 py-4">
+            <a href="{{ route('admin.quotes.create') }}" class="mae-btn-primary mb-3 w-full">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nueva cotización
+            </a>
             <form method="POST" action="{{ route('admin.logout') }}">
                 @csrf
                 <button type="submit" class="mae-admin-link mae-admin-link-idle w-full">
@@ -111,32 +132,52 @@
     </aside>
 
     {{-- Contenido --}}
-    <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+    <div class="relative z-10 flex min-w-0 flex-1 flex-col overflow-hidden">
         <livewire:admin.quote-notifications />
-        <header class="border-b border-white/10 bg-[#081525]/92 px-4 py-4 shadow-[0_14px_40px_rgba(0,0,0,0.24)] backdrop-blur-xl">
+        <header class="border-b border-white/10 bg-[#081525]/78 px-4 py-4 shadow-[0_14px_40px_rgba(0,0,0,0.24)] backdrop-blur-2xl">
             <div class="flex items-center justify-between gap-3">
             {{-- Botón hamburguesa mobile --}}
-            <button @click="sidebarOpen = true" class="p-1 text-[#9db1cc] hover:text-white lg:hidden">
+            <button @click="sidebarOpen = true" class="mae-icon-button lg:hidden">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
             <div class="min-w-0">
                 <p class="mae-kicker">Operación</p>
                 <h1 class="truncate font-display text-2xl font-bold uppercase tracking-[0.18em] text-white">{{ $title ?? 'Panel de Administración' }}</h1>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2" @click.outside="userMenuOpen = false">
+                <a href="{{ route('admin.quotes.create') }}" class="mae-btn-secondary hidden px-3 py-2 text-xs md:inline-flex">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Cotización
+                </a>
                 {{-- Acceso rápido a nueva cotización en mobile --}}
                 <a href="{{ route('admin.quotes.create') }}"
                     class="mae-btn-primary px-3 py-2 text-xs lg:hidden">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Cotización
                 </a>
-                <span class="hidden rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm font-semibold text-[#d6e1ee] lg:block">{{ auth()->user()->name }}</span>
+                <div class="relative hidden lg:block">
+                    <button @click="userMenuOpen = ! userMenuOpen" class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/6 px-3 py-2 text-sm font-semibold text-[#d6e1ee] transition hover:border-mae-gold/50 hover:text-white">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-mae-gold text-xs font-black text-[#09131f]">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
+                        <span>{{ auth()->user()->name }}</span>
+                        <svg class="h-4 w-4 text-[#8fa7c5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div x-show="userMenuOpen" x-cloak x-transition.origin.top.right
+                        class="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-[#071527] p-2 shadow-[0_24px_70px_rgba(0,0,0,0.42)]">
+                        <a href="{{ route('admin.dashboard') }}" class="mae-menu-item">Ir al dashboard</a>
+                        <form method="POST" action="{{ route('admin.logout') }}">
+                            @csrf
+                            <button type="submit" class="mae-menu-item w-full text-left text-red-200 hover:text-red-100">Cerrar sesión</button>
+                        </form>
+                    </div>
+                </div>
             </div>
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto bg-transparent p-4 lg:p-6">
-            {{ $slot }}
+        <main class="mae-scrollbar flex-1 overflow-y-auto bg-transparent p-4 lg:p-6">
+            <div class="mx-auto w-full max-w-7xl">
+                {{ $slot }}
+            </div>
         </main>
     </div>
 

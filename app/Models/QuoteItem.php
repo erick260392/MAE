@@ -7,9 +7,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QuoteItem extends Model
 {
-    protected $fillable = ['quote_id', 'product_id', 'quantity', 'unit_price', 'subtotal', 'delivery_time', 'notes'];
+    protected $fillable = [
+        'quote_id',
+        'product_id',
+        'quantity',
+        'original_unit_price',
+        'unit_price',
+        'discount_type',
+        'discount_value',
+        'discount_amount',
+        'subtotal',
+        'delivery_time',
+        'notes',
+    ];
 
-    protected $casts = ['unit_price' => 'decimal:2', 'subtotal' => 'decimal:2'];
+    protected $casts = [
+        'original_unit_price' => 'decimal:2',
+        'unit_price' => 'decimal:2',
+        'discount_value' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'subtotal' => 'decimal:2',
+    ];
 
     public function quote(): BelongsTo
     {

@@ -27,7 +27,11 @@ class QuoteItemFactory extends Factory
             'quote_id' => Quote::factory(),
             'product_id' => $product->id,
             'quantity' => $quantity,
+            'original_unit_price' => $unitPrice,
             'unit_price' => $unitPrice,
+            'discount_type' => 'none',
+            'discount_value' => 0,
+            'discount_amount' => 0,
             'subtotal' => $quantity * $unitPrice,
             'delivery_time' => $this->faker->optional()->words(2, true),
         ];

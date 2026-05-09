@@ -7,29 +7,20 @@ use Livewire\Component;
 
 class Dashboard extends Component
 {
-    public function __construct(private DashboardStatsService $stats) {}
-
-    public function render()
+    public function render(DashboardStatsService $stats)
     {
         return view('livewire.admin.dashboard', [
-            // Overall metrics
-            'stats' => $this->stats->getOverallStats(),
-            'conversionRate' => $this->stats->getConversionRate(),
-            'averageQuoteValue' => $this->stats->getAverageQuoteValue(),
-
-            // Chart data
-            'quotesByStatus' => $this->stats->getQuotesByStatus(),
-            'monthlyQuotes' => $this->stats->getMonthlyQuotesData(),
-            'revenueByStatus' => $this->stats->getRevenueByStatus(),
-
-            // Lists
-            'recentQuotes' => $this->stats->getRecentQuotes(5),
-            'topCustomers' => $this->stats->getTopCustomers(5),
-            'lowStockProducts' => $this->stats->getLowStockProducts(5),
-            'topProducts' => $this->stats->getTopProducts(5),
-
-            // Additional metrics
-            'activeCategories' => $this->stats->getActiveCategoriesCount(),
+            'stats' => $stats->getOverallStats(),
+            'conversionRate' => $stats->getConversionRate(),
+            'averageQuoteValue' => $stats->getAverageQuoteValue(),
+            'quotesByStatus' => $stats->getQuotesByStatus(),
+            'monthlyQuotes' => $stats->getMonthlyQuotesData(),
+            'revenueByStatus' => $stats->getRevenueByStatus(),
+            'recentQuotes' => $stats->getRecentQuotes(5),
+            'topCustomers' => $stats->getTopCustomers(5),
+            'lowStockProducts' => $stats->getLowStockProducts(5),
+            'topProducts' => $stats->getTopProducts(5),
+            'activeCategories' => $stats->getActiveCategoriesCount(),
         ])->layout('layouts.admin', ['title' => 'Dashboard']);
     }
 }

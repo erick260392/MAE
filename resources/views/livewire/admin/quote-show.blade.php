@@ -53,6 +53,7 @@
                     <th class="text-left px-6 py-3 text-gray-500 font-medium">Producto</th>
                     <th class="text-right px-6 py-3 text-gray-500 font-medium">Precio unit.</th>
                     <th class="text-right px-6 py-3 text-gray-500 font-medium">Cantidad</th>
+                    <th class="text-right px-6 py-3 text-gray-500 font-medium">Descuento</th>
                     <th class="text-right px-6 py-3 text-gray-500 font-medium">Subtotal</th>
                 </tr>
             </thead>
@@ -67,13 +68,30 @@
                     </td>
                     <td class="px-6 py-3 text-right text-[#d6e2ef]">${{ number_format($item->unit_price, 2) }}</td>
                     <td class="px-6 py-3 text-right text-[#d6e2ef]">{{ $item->quantity }} {{ $item->product->unit }}</td>
+                    <td class="px-6 py-3 text-right text-yellow-200">
+                        {{ (float) $item->discount_amount > 0 ? '-$'.number_format($item->discount_amount, 2) : '—' }}
+                    </td>
                     <td class="px-6 py-3 text-right font-medium text-white">${{ number_format($item->subtotal, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>
             <tfoot class="border-t border-white/10 bg-white/4">
                 <tr>
-                    <td colspan="3" class="px-6 py-3 text-right font-semibold text-[#d6e2ef]">Total</td>
+                    <td colspan="4" class="px-6 py-3 text-right font-semibold text-[#d6e2ef]">Subtotal</td>
+                    <td class="px-6 py-3 text-right font-semibold text-white">${{ number_format($quote->subtotal ?: $quote->items->sum('subtotal'), 2) }}</td>
+                </tr>
+                @if((float) $quote->discount_amount > 0)
+                <tr>
+                    <td colspan="4" class="px-6 py-3 text-right font-semibold text-yellow-200">Descuento cotización</td>
+                    <td class="px-6 py-3 text-right font-semibold text-yellow-200">-${{ number_format($quote->discount_amount, 2) }}</td>
+                </tr>
+                @endif
+                <tr>
+                    <td colspan="4" class="px-6 py-3 text-right font-semibold text-[#d6e2ef]">IVA</td>
+                    <td class="px-6 py-3 text-right font-semibold text-white">${{ number_format($quote->tax_amount ?: max(0, ($quote->subtotal ?: $quote->items->sum('subtotal')) - $quote->discount_amount) * 0.16, 2) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="px-6 py-3 text-right font-semibold text-[#d6e2ef]">Total</td>
                     <td class="px-6 py-3 text-right text-base font-bold text-white">${{ number_format($quote->total, 2) }} MXN</td>
                 </tr>
             </tfoot>

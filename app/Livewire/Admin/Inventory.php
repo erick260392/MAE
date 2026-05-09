@@ -2,26 +2,56 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\StockMovement;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Inventory extends Component
 {
+    use WithPagination;
+
     public string $search = '';
+
     public string $filterCategory = '';
 
+    public string $filterStock = '';  // 'low' | 'zero' | ''
+
+    protected $queryString = ['search', 'filterCategory', 'filterStock'];
+
     public bool $showModal = false;
+
     public bool $showHistory = false;
 
     public ?int $productId = null;
+
     public string $productName = '';
+
     public int $currentStock = 0;
 
     public string $type = 'entrada';
+
     public string $quantity = '';
+
     public string $reason = '';
+
     public string $notes = '';
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterCategory(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterStock(): void
+    {
+        $this->resetPage();
+    }
 
     public function openMovement(Product $product): void
     {
@@ -49,23 +79,24 @@ class Inventory extends Component
     {
         $this->validate([
             'quantity' => 'required|integer|min:1',
-            'reason'   => 'required|max:150',
-            'notes'    => 'nullable|max:500',
+            'reason' => 'required|max:150',
+            'notes' => 'nullable|max:500',
         ]);
 
         $product = Product::find($this->productId);
 
         if ($this->type === 'salida' && $this->quantity > $product->stock) {
-            $this->addError('quantity', 'No hay suficiente stock. Stock actual: ' . $product->stock);
+            $this->addError('quantity', 'No hay suficiente stock. Stock actual: '.$product->stock);
+
             return;
         }
 
         StockMovement::create([
             'product_id' => $this->productId,
-            'type'       => $this->type,
-            'quantity'   => $this->quantity,
-            'reason'     => $this->reason,
-            'notes'      => $this->notes ?: null,
+            'type' => $this->type,
+            'quantity' => $this->quantity,
+            'reason' => $this->reason,
+            'notes' => $this->notes ?: null,
         ]);
 
         $newStock = $this->type === 'entrada'
@@ -81,19 +112,29 @@ class Inventory extends Component
     public function render()
     {
         $products = Product::with('category')
-            ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))
-            ->when($this->filterCategory, fn($q) => $q->where('category_id', $this->filterCategory))
-            ->orderBy('name')
-            ->get();
+            ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%")
+                ->orWhere('sku', 'like', "%{$this->search}%"))
+            ->when($this->filterCategory, fn ($q) => $q->where('category_id', $this->filterCategory))
+            ->when($this->filterStock === 'zero', fn ($q) => $q->where('stock', 0))
+            ->when($this->filterStock === 'low', fn ($q) => $q->where('stock', '>', 0)->where('stock', '<=', 5))
+            ->orderBy('stock')->orderBy('name')
+            ->paginate(25);
 
         $history = $this->showHistory && $this->productId
             ? StockMovement::where('product_id', $this->productId)->latest()->take(20)->get()
             : collect();
 
+        $totalProducts = Product::count();
+        $zeroStock = Product::where('stock', 0)->count();
+        $lowStock = Product::where('stock', '>', 0)->where('stock', '<=', 5)->count();
+
         return view('livewire.admin.inventory', [
-            'products'   => $products,
-            'categories' => \App\Models\Category::orderBy('name')->get(),
-            'history'    => $history,
+            'products' => $products,
+            'categories' => Category::orderBy('name')->get(),
+            'history' => $history,
+            'totalProducts' => $totalProducts,
+            'zeroStock' => $zeroStock,
+            'lowStock' => $lowStock,
         ])->layout('layouts.admin', ['title' => 'Inventario']);
     }
 }

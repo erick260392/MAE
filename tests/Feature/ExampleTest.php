@@ -4,6 +4,7 @@ use App\Livewire\Admin\Categories;
 use App\Livewire\Admin\Customers;
 use App\Livewire\Admin\Inventory;
 use App\Livewire\Admin\Login;
+use App\Livewire\Admin\QuoteCreate;
 use App\Livewire\Admin\Quotes;
 use App\Livewire\Catalog\ProductCatalog;
 use App\Livewire\Catalog\QuoteCart;
@@ -455,6 +456,45 @@ describe('Admin Quotes Livewire', function () {
         Livewire::actingAs($user)->test(Quotes::class);
 
         expect(Quote::whereNull('seen_at')->count())->toBe(0);
+    });
+
+    test('crea cotización guardando precio base y descuentos', function () {
+        $user = User::factory()->create();
+        $category = Category::create(['name' => 'Mangueras', 'slug' => 'mangueras']);
+        $customer = Customer::create(['name' => 'Juan', 'phone' => '5512345678']);
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Manguera industrial',
+            'slug' => 'manguera-industrial',
+            'price' => 100,
+            'stock' => 10,
+            'unit' => 'metro',
+            'active' => true,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(QuoteCreate::class)
+            ->set('customer_id', $customer->id)
+            ->set('items.0.product_id', $product->id)
+            ->set('items.0.quantity', 2)
+            ->set('items.0.discount_type', 'percent')
+            ->set('items.0.discount_value', 10)
+            ->set('discount_type', 'fixed')
+            ->set('discount_value', 30)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $quote = Quote::with('items')->first();
+        $item = $quote->items->first();
+
+        expect($item->original_unit_price)->toBe('100.00')
+            ->and($item->unit_price)->toBe('100.00')
+            ->and($item->discount_amount)->toBe('20.00')
+            ->and($item->subtotal)->toBe('180.00')
+            ->and($quote->subtotal)->toBe('180.00')
+            ->and($quote->discount_amount)->toBe('30.00')
+            ->and($quote->tax_amount)->toBe('24.00')
+            ->and($quote->total)->toBe('174.00');
     });
 });
 

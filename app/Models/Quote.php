@@ -8,9 +8,30 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Quote extends Model
 {
-    protected $fillable = ['customer_id', 'folio', 'status', 'total', 'notes', 'delivery_time', 'conditions', 'seen_at'];
+    protected $fillable = [
+        'customer_id',
+        'folio',
+        'status',
+        'subtotal',
+        'discount_type',
+        'discount_value',
+        'discount_amount',
+        'tax_amount',
+        'total',
+        'notes',
+        'delivery_time',
+        'conditions',
+        'seen_at',
+    ];
 
-    protected $casts = ['seen_at' => 'datetime'];
+    protected $casts = [
+        'subtotal' => 'decimal:2',
+        'discount_value' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'total' => 'decimal:2',
+        'seen_at' => 'datetime',
+    ];
 
     protected static function booted(): void
     {

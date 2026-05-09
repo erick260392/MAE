@@ -21,6 +21,11 @@ class QuoteFactory extends Factory
         return [
             'customer_id' => Customer::factory(),
             'status' => $this->faker->randomElement(['pendiente', 'confirmada', 'cancelada']),
+            'subtotal' => $this->faker->randomFloat(2, 100, 10000),
+            'discount_type' => 'none',
+            'discount_value' => 0,
+            'discount_amount' => 0,
+            'tax_amount' => 0,
             'total' => $this->faker->randomFloat(2, 100, 10000),
             'notes' => $this->faker->optional()->sentence(),
             'delivery_time' => $this->faker->optional()->words(2, true),

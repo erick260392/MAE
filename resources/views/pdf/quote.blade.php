@@ -132,6 +132,7 @@
                 <th class="center" style="width:50px;">Unidad</th>
                 <th>Descripción</th>
                 <th class="right" style="width:80px;">P. Unit.</th>
+                <th class="right" style="width:70px;">Desc.</th>
                 <th class="right" style="width:80px;">Total</th>
                 <th class="center" style="width:70px;">T. Entrega</th>
             </tr>
@@ -144,22 +145,25 @@
                 <td class="center">{{ $item->product->unit }}</td>
                 <td>{{ $item->product->name }}</td>
                 <td class="right">${{ number_format($item->unit_price, 2) }}</td>
+                <td class="right">{{ (float) $item->discount_amount > 0 ? '$'.number_format($item->discount_amount, 2) : '—' }}</td>
                 <td class="right">${{ number_format($item->subtotal, 2) }}</td>
                 <td class="center">{{ $item->delivery_time ?? '—' }}</td>
             </tr>
             @endforeach
             {{-- Filas vacías para dar espacio --}}
             @for($i = count($quote->items); $i < 8; $i++)
-            <tr style="height:18px;"><td colspan="7"></td></tr>
+            <tr style="height:18px;"><td colspan="8"></td></tr>
             @endfor
         </tbody>
     </table>
 
     {{-- Footer con condiciones y totales --}}
     @php
-        $subtotal = $quote->items->sum('subtotal');
-        $iva = $subtotal * 0.16;
-        $total = $subtotal + $iva;
+        $subtotal = (float) ($quote->subtotal ?: $quote->items->sum('subtotal'));
+        $quoteDiscount = (float) $quote->discount_amount;
+        $taxableSubtotal = max(0, $subtotal - $quoteDiscount);
+        $iva = (float) ($quote->tax_amount ?: $taxableSubtotal * 0.16);
+        $total = (float) ($quote->total ?: $taxableSubtotal + $iva);
     @endphp
 
     <div class="footer-table">
@@ -180,6 +184,12 @@
                         <td class="label">SUBTOTAL</td>
                         <td class="value">${{ number_format($subtotal, 2) }}</td>
                     </tr>
+                    @if($quoteDiscount > 0)
+                    <tr>
+                        <td class="label">DESCUENTO</td>
+                        <td class="value">-${{ number_format($quoteDiscount, 2) }}</td>
+                    </tr>
+                    @endif
                     <tr>
                         <td class="label">IVA 16%</td>
                         <td class="value">${{ number_format($iva, 2) }}</td>
